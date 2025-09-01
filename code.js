@@ -85,10 +85,19 @@ function doRegister()
 			if (this.readyState == 4 && this.status == 200) {
 				let jsonObject = JSON.parse(xhr.responseText);
 
-				if (jsonObject.error && jsonObject.error !== "") {
+				if (jsonObject.error && jsonObject.error !== "")
+				{
 					document.getElementByID("loginResult").innerHTML = jsonObject.error;
 					return;
 				}
+
+				userId = jsonObject.id;
+				firstName = jsonObject.firstName;
+				lastName = jsonObject.lastName;
+
+				saveCookie();
+
+				window.location.href = "home.html";
 			}
 		};
 		xhr.send(jsonPayload);
