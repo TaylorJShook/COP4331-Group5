@@ -1,0 +1,2 @@
+# API Work for Group 5
+API roles: You will demonstrate your APIs to the GTA during lab. This is required attendance and participation for you. you will show the GTA your source code using Putty (or your choice) to login to the server and then using VI (or your choice), Then you must use ARC or Postman to test the API endpoints. You MUST have at least the login and register (signup) endpoints working.
