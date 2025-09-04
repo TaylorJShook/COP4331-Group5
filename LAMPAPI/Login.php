@@ -1,5 +1,13 @@
-
 <?php
+	// ---------- CORS for local dev ----------
+	header('Access-Control-Allow-Origin: http://127.0.0.1:3000');
+	header('Access-Control-Allow-Headers: Content-Type');
+	header('Access-Control-Allow-Methods: POST, OPTIONS');
+	if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; } // handle preflight
+	//
+
+	header('Content-Type: application/json');
+
 
 	$inData = getRequestInfo();
 	
@@ -7,7 +15,7 @@
 	$firstName = "";
 	$lastName = "";
 
-	$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "COP4331"); 	
+	$conn = new mysqli("localhost", "xxx", "xxx", "COP4331"); 	
 	if( $conn->connect_error )
 	{
 		returnWithError( $conn->connect_error );
