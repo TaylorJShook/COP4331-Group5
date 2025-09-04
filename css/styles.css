@@ -75,12 +75,12 @@ body
 {
 	font-size: 30px;
 }
-#contactText
+#contactText, #contactFirstName, #contactLastName, #contactPhone, #contactEmail
 {
 	font-size: 30px;
 }
 
-input[type="text"],input[type="password"]{
+input[type="text"],input[type="password"], input[type="tel"], input[type="email"]{
     border-radius: 25px;
     text-align: center;
     width: 80%;

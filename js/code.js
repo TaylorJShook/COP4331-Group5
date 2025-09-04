@@ -1,4 +1,4 @@
-const urlBase = 'http://COP4331-group5.xyz/LAMPAPI';
+const urlBase = 'http://127.0.0.1:8000';
 const extension = 'php';
 
 let userId = 0;
@@ -60,7 +60,7 @@ function doLogin()
 
 function doRegister()
 {
-	userID = 0;
+	userId = 0;
 	firstName = "";
 	lastName = "";
 
@@ -87,7 +87,7 @@ function doRegister()
 
 				if (jsonObject.error && jsonObject.error !== "")
 				{
-					document.getElementByID("loginResult").innerHTML = jsonObject.error;
+					document.getElementById("loginResult").innerHTML = jsonObject.error;
 					return;
 				}
 
@@ -159,36 +159,76 @@ function doLogout()
 	window.location.href = "index.html";
 }
 
-function addContact()
-{
-	let newContact = document.getElementById("contactText").value;
-	document.getElementById("contactAddResult").innerHTML = "";
+function addContact() {
+  const firstName = document.getElementById("contactFirstName")?.value.trim() || "";
+  const lastName  = document.getElementById("contactLastName")?.value.trim()  || "";
+  const phone     = document.getElementById("contactPhone")?.value.trim()     || "";
+  const email     = document.getElementById("contactEmail")?.value.trim()     || "";
+  const resultEl  = document.getElementById("contactAddResult");
+  const btn       = document.getElementById("addContactButton");
 
-	let tmp = {contact:newContact,userId,userId};
-	let jsonPayload = JSON.stringify( tmp );
+  resultEl.textContent = "";
 
-	let url = urlBase + '/AddContact.' + extension;
-	
-	let xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
-				document.getElementById("contactAddResult").innerHTML = "Contact has been added";
-			}
-		};
-		xhr.send(jsonPayload);
-	}
-	catch(err)
-	{
-		document.getElementById("contactAddResult").innerHTML = err.message;
-	}
-	
+  // 1) Required fields
+  if (!firstName || !lastName || !phone || !email) {
+    resultEl.textContent = "Please fill out all fields.";
+    return;
+  }
+
+  // 2) Phone validation: only digits/space/()+-. and 7–20 digits total
+  const phoneDigits = phone.replace(/\D/g, "");
+  const phoneCharsOk = /^[0-9()\s\-+.]+$/.test(phone);
+  if (!phoneCharsOk || phoneDigits.length < 7 || phoneDigits.length > 20) {
+    resultEl.textContent = "Please enter a valid phone number (7–20 digits).";
+    return;
+  }
+
+  // 3) Email validation
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (!emailOk) {
+    resultEl.textContent = "Please enter a valid email address.";
+    return;
+  }
+
+  // 4) Must be logged in
+  if (!userId || userId <= 0) {
+    resultEl.textContent = "You appear to be logged out. Please sign in again.";
+    return;
+  }
+
+  // Send
+  const payload = { firstName, lastName, phone, email, userId };
+  btn && (btn.disabled = true);
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", urlBase + "/AddContact." + extension, true);
+  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState !== 4) return;
+    btn && (btn.disabled = false);
+
+    if (xhr.status !== 200) {
+      resultEl.textContent = "Request failed: " + xhr.status;
+      return;
+    }
+
+    let data = {};
+    try { data = JSON.parse(xhr.responseText || "{}"); }
+    catch { resultEl.textContent = "Bad JSON from server."; return; }
+
+    if (data.error) { resultEl.textContent = data.error; return; }
+
+    resultEl.textContent = "Contact added successfully.";
+    // clear fields
+    document.getElementById("contactFirstName").value = "";
+    document.getElementById("contactLastName").value  = "";
+    document.getElementById("contactPhone").value     = "";
+    document.getElementById("contactEmail").value     = "";
+  };
+
+  xhr.send(JSON.stringify(payload));
 }
+
 
 function delContact() {
 	let newContact = document.getElementById("contactText").value;
