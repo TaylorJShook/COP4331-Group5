@@ -256,47 +256,63 @@ function delContact() {
 
 }
 
-function searchContacts()
-{
-	let srch = document.getElementById("searchText").value;
-	document.getElementById("contactSearchResult").innerHTML = "";
-	
-	let contactList = "";
+function searchContacts() {
+  const q = document.getElementById("searchText").value.trim();
+  const resultMsg = document.getElementById("contactSearchResult");
+  const listEl = document.getElementById("contactList");
 
-	let tmp = {search:srch,userId:userId};
-	let jsonPayload = JSON.stringify( tmp );
+  resultMsg.textContent = "";
+  listEl.innerHTML = "";
 
-	let url = urlBase + '/SearchContacts.' + extension;
-	
-	let xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
-				document.getElementById("contactSearchResult").innerHTML = "Contact(s) has been retrieved";
-				let jsonObject = JSON.parse( xhr.responseText );
-				
-				for( let i=0; i<jsonObject.results.length; i++ )
-				{
-					contactList += jsonObject.results[i];
-					if( i < jsonObject.results.length - 1 )
-					{
-						contactList += "<br />\r\n";
-					}
-				}
-				
-				document.getElementsByTagName("p")[0].innerHTML = contactList;
-			}
-		};
-		xhr.send(jsonPayload);
-	}
-	catch(err)
-	{
-		document.getElementById("contactSearchResult").innerHTML = err.message;
-	}
-	
+  if (!userId || userId <= 0) {
+    resultMsg.textContent = "You appear to be logged out. Please sign in again.";
+    return;
+  }
+
+  const payload = { userId, search: q };
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", urlBase + "/SearchContacts." + extension, true);
+  xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState !== 4) return;
+
+    if (xhr.status !== 200) {
+      resultMsg.textContent = "Search failed: " + xhr.status;
+      return;
+    }
+
+    let data = {};
+    try { data = JSON.parse(xhr.responseText || "{}"); }
+    catch { resultMsg.textContent = "Bad JSON from server."; return; }
+
+    if (data.error) {
+      resultMsg.textContent = data.error;
+      return;
+    }
+
+    if (!data.results || data.results.length === 0) {
+      resultMsg.textContent = "No contacts found.";
+      return;
+    }
+
+    const lines = data.results.map(c => (
+      `${escapeHtml(c.firstName)} ${escapeHtml(c.lastName)} — ` +
+      `${escapeHtml(c.phone || "")} — ${escapeHtml(c.email || "")}`
+    ));
+    listEl.innerHTML = lines.join("<br>");
+    resultMsg.textContent = `Found ${data.results.length} contact(s).`;
+  };
+
+  xhr.send(JSON.stringify(payload));
 }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+

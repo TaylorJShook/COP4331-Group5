@@ -1,84 +1,54 @@
 <?php
+// CORS (dev)
+header("Access-Control-Allow-Origin: http://127.0.0.1:3000");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+//
 
-    $inData = getRequestInfo();
+header('Content-Type: application/json; charset=utf-8');
 
-    $userId = isset($inData["userId"]) ? intval($inData["userId"]) : 0;
-    $search = isset($inData["search"]) ? $inData["search"] : "";
+function out($a,$c=200){ http_response_code($c); echo json_encode($a); exit; }
 
-    $searchResults = "";
-    $searchCount = 0;
+$in = json_decode(file_get_contents('php://input'), true);
+if (!is_array($in)) out(["results"=>[],"error"=>"Invalid JSON"], 400);
 
-    $conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "COP4331");
-    if( $conn->connect_error )
-    {
-        returnWithError( $conn->connect_error );
-    }
-    else
-    {
-        $like = "%" . $search . "%";
+$userId = (int)($in["userId"] ?? 0);
+$search = trim($in["search"] ?? "");
+if ($userId <= 0) out(["results"=>[],"error"=>"Missing userId"], 400);
 
-        $stmt = $conn->prepare(
-            "SELECT ID, FirstName, LastName, Phone, Email
-             FROM Contacts
-             WHERE UserID = ? AND (
-                   FirstName LIKE ? OR LastName LIKE ? OR Phone LIKE ? OR Email LIKE ?
-             )"
-        );
-        $stmt->bind_param("issss", $userId, $like, $like, $like, $like);
-        $stmt->execute();
-        $result = $stmt->get_result();
+$like = "%".$search."%";
 
-        while( $row = $result->fetch_assoc() )
-        {
-            if( $searchCount > 0 )
-            {
-                $searchResults .= ",";
-            }
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+try {
+  $conn = new mysqli("127.0.0.1", "xxx", "xxx", "COP4331", 3306);
+  $conn->set_charset('utf8mb4');
 
-            $searchResults .=
-                '{"ID":'        . $row["ID"] .
-                ',"FirstName":"' . $row["FirstName"] .
-                '","LastName":"'  . $row["LastName"] .
-                '","Phone":"'     . $row["Phone"] .
-                '","Email":"'     . $row["Email"] . '"}';
+  $stmt = $conn->prepare("
+    SELECT ID, FirstName, LastName, Phone, Email
+    FROM Contacts
+    WHERE UserID = ?
+      AND (FirstName LIKE ? OR LastName LIKE ? OR Phone LIKE ? OR Email LIKE ?)
+    ORDER BY LastName, FirstName, ID DESC
+  ");
+  $stmt->bind_param("issss", $userId, $like, $like, $like, $like);
+  $stmt->execute();
+  $res = $stmt->get_result();
 
-            $searchCount++;
-        }
+  $rows = [];
+  while ($r = $res->fetch_assoc()) {
+    $rows[] = [
+      "id"        => (int)$r["ID"],
+      "firstName" => $r["FirstName"],
+      "lastName"  => $r["LastName"],
+      "phone"     => $r["Phone"],
+      "email"     => $r["Email"]
+    ];
+  }
+  $stmt->close(); $conn->close();
 
-        $stmt->close();
-        $conn->close();
-
-        if( $searchCount == 0 )
-        {
-            returnWithError("No Records Found");
-        }
-        else
-        {
-            returnWithInfo( $searchResults );
-        }
-    }
-
-    function getRequestInfo()
-    {
-        return json_decode(file_get_contents('php://input'), true);
-    }
-
-    function sendResultInfoAsJson( $obj )
-    {
-        header('Content-type: application/json');
-        echo $obj;
-    }
-
-    function returnWithError( $err )
-    {
-        $retValue = '{"id":0,"firstName":"","lastName":"","error":"' . $err . '"}';
-        sendResultInfoAsJson( $retValue );
-    }
-
-    function returnWithInfo( $searchResults )
-    {
-        $retValue = '{"results":[' . $searchResults . '],"error":""}';
-        sendResultInfoAsJson( $retValue );
-    }
-
-?>
+  out(["results"=>$rows, "count"=>count($rows), "error"=>""]);
+} catch (mysqli_sql_exception $e) {
+  out(["results"=>[],"error"=>"Database error"], 500);
+}
