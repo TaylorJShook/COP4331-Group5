@@ -1,27 +1,37 @@
-﻿<html>
+<!DOCTYPE html>
+<html>
 <head>
-    <title>Register - Contact Manager Account</title>
-    <script type="text/javascript" src="js/md5.js"</script>
-    <script type="text/javascript" src="js/code.js"></script>
-    <link href="css/styles.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+  <title>Contact Manager - Register</title>
+  <script type="text/javascript" src="js/md5.js"></script>
+  <script type="text/javascript" src="js/code.js"></script>
+  <link href="css/styles.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
 </head>
 <body>
 
-    <h1 id="title">Register Contact Manager</h1>
+  <h1 id="title">Contact Manager</h1>
 
-    <div id="registerDiv">
-        <span id="inner-title">CREATE ACCOUNT</span>
-        <input type="text" id="firstName" placeholder="First Name" /><br />
-        <input type="text" id="firstName" placeholder="Last Name" /><br />
-        <input type="text" id="loginName" placeholder="Username" /><br />
-        <input type="password" id="loginPassword" placeholder="Password" /><br />
-        <button type="button" id="registerButton" class="buttons" onclick="doRegister();"> Register </button>
-        <span id="loginResult"></span>
-        <!--Back to login page-->
-        <button type="button" id="toLoginButton" class="buttons" onclick="window.location.href = 'index.html';">Back to Login</button>
-    </div>
+  <!-- Reuse #loginDiv container to get the same gray panel look from styles.css -->
+  <div id="loginDiv">
+    <span id="inner-title">CREATE ACCOUNT</span>
+    <input type="text" id="firstName" placeholder="First Name" /><br />
+    <input type="text" id="lastName" placeholder="Last Name" /><br />
+    <input type="text" id="loginName" placeholder="Username" /><br />
+    <input type="password" id="loginPassword" placeholder="Password" /><br />
+    <!-- Register button -->
+    <button type="button" id="registerButton" class="buttons" onclick="doRegister();">
+        Register
+    </button>
+
+    <!-- Message area (errors/success). Reuse the same id the sample styles (#loginResult) -->
+    <span id="loginResult"></span>
+
+    <!-- Back to login page (navigation) -->
+    <br /><br />
+    <button type="button" class="buttons" onclick="location.href='index.html';">
+        Back to Login
+    </button>
+  </div>
 
 </body>
-
 </html>
