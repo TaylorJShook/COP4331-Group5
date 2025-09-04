@@ -1,5 +1,4 @@
-//const urlBase = 'http://cop4331-group5.xyz/LAMPAPI';
-const urlBase = 'http://xyz123.site/LAMPAPI';
+const urlBase = 'http://cop4331-group5.xyz/LAMPAPI';
 const extension = 'php';
 
 let userId = 0;
@@ -446,4 +445,5 @@ function deleteContact(contactId)
     {
         alert(err.message);
     }
+
 }
