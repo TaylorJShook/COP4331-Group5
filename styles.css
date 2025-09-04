@@ -63,19 +63,11 @@ body
 {
 	font-size: 30px;
 }
-#firstName 
-{
-    font-size: 30px;
-}
-#lastName 
-{
-    font-size: 30px;
-}
 #searchText
 {
 	font-size: 30px;
 }
-#contactText
+#colorText
 {
 	font-size: 30px;
 }
@@ -118,20 +110,6 @@ input[type="text"],input[type="password"]{
     text-align: center;
 }
 
-#firstName {
-    display: inline-block;
-    width: 80%;
-    margin-left: 10%;
-    text-align: center;
-}
-
-#lastName {
-    display: inline-block;
-    width: 80%;
-    margin-left: 10%;
-    text-align: center;
-}
-
 #logoutButton{
     width: 20%;
     margin-left: 40%;
@@ -145,11 +123,11 @@ select{
     font-family: 'Ubuntu', sans-serif;
 }
 
-#contactSearchResult{
+#colorSearchResult{
     display: none;
 }
 
-#contactAddResult{
+#colorAddResult{
     display: inline-block;
     font-size: 0.8em;
     width: 90%;
@@ -159,4 +137,45 @@ select{
     margin-bottom: 1%;
     font-family: 'Ubuntu', sans-serif;
     color: #95060a;
+}
+
+/* New: contact manager message areas */
+#contactSearchResult,
+#contactAddResult {
+    display: inline-block;
+    font-size: 0.8em;
+    width: 90%;
+    text-align: center;
+    margin-left: 5%;
+    margin-top: 2%;
+    margin-bottom: 1%;
+    font-family: 'Ubuntu', sans-serif;
+    color: #95060a;           
+}
+
+#results table {
+    width: 100%;
+    border-collapse: collapse;    
+    font-family: 'Ubuntu', sans-serif;
+}
+#results th, 
+#results td {
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 0.8em;             
+    border-bottom: 1px solid #9a9a9a;
+}
+#results thead th {
+    font-weight: bold;
+}
+#results tr:hover {
+    background-color: #c7c7c7;     
+}
+
+/* Make action buttons in table not stretch full width */
+#results .buttons {
+    width: auto;
+    margin-left: 0;
+    font-size: 0.8em;                /* scale down inside table */
+    padding: 4px 10px;
 }
