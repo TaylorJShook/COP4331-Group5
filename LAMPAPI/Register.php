@@ -1,70 +1,86 @@
 <?php
+// ---------- CORS for local dev ----------
+header("Access-Control-Allow-Origin: http://127.0.0.1:3000");
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+// 
 
-$inData = getRequestInfo();
+header('Content-Type: application/json; charset=utf-8');
+// error_reporting(E_ALL); ini_set('display_errors', 1); // uncomment while debugging
 
-$servername = "localhost";
-$uname = "root";
-$pword = "COP4331group5lamp";
-$databasename = "COP4331";
-
-// creating connections
-$conn = new mysqli($servername, $uname, $pword, $databasename);
-
-//  check connections
-if(!$conn)
-{
-  die("Connection failed: ". $conn->connect_error);
+$in = json_decode(file_get_contents('php://input'), true);
+if (!is_array($in)) {
+    returnError('Invalid JSON');
+    exit;
 }
 
-else
-{
-  echo "Connect succesfully";
+$first = trim($in['firstName'] ?? '');
+$last  = trim($in['lastName'] ?? '');
+$login = trim($in['login'] ?? '');
+$pass  = trim($in['password'] ?? '');
+
+if ($first === '' || $last === '' || $login === '' || $pass === '') {
+    returnError('Missing required fields');
+    exit;
 }
 
-//$sql = "INSERT INTO user_list (first_name, last_name, phone, email, other_info, email_verification) VALUES('Ben', 'clyde', '1234567890', 'awesomesauce@gmail.com', 'null', '0')";
-
-$sql = "INSERT INTO user_list (first_name, last_name, phone, email, other_info, email_verification) VALUES('$inData["first_name"]', '$inData["last_name"]', '$inData["phone"] ', '$inData["email"]', 'null', '0')";
-
-if($conn->query($sql) === TRUE)
-{
-  //echo "New record created successfully";
-
-  $row = $result->fetch->fetch_assoc();
-  $first_name = $row["first_name"];
-  $last_name = $row["last_name"];
-  $phone = $row["phone"];
-  $email = $row["email"];
-
-
-  returnWithInfo($first_name, $last_name, $phone, $email);
+// DB connect (use your creds)
+$conn = new mysqli('localhost', 'xxx', 'xxx', 'COP4331');
+if ($conn->connect_error) {
+    returnError('DB connection failed');
+    exit;
 }
-else
-{
-   returnWithError("Account Creation Failed!" )
+
+// Optional: check duplicate login
+$chk = $conn->prepare('SELECT ID FROM Users WHERE Login = ?');
+$chk->bind_param('s', $login);
+$chk->execute();
+$chk->store_result();
+
+if ($chk->num_rows > 0) {
+    $chk->close();
+    $conn->close();
+    returnError('Login already exists');
+    exit;
 }
+$chk->close();
+
+// INSERT (prepared)
+$ins = $conn->prepare(
+    'INSERT INTO Users (FirstName, LastName, Login, Password) VALUES (?,?,?,?)'
+);
+$ins->bind_param('ssss', $first, $last, $login, $pass); // pass can be plain or md5-hash (match Login.php)
+
+if (!$ins->execute()) {
+    $ins->close();
+    $conn->close();
+    returnError('Insert failed');
+    exit;
+}
+
+$id = $ins->insert_id;
+$ins->close();
 $conn->close();
 
-function getRequestInfo()
-{
-  return json_decode(file_get_contents('php://input'), true);
-}
+echo json_encode([
+    'id'        => $id,
+    'firstName' => $first,
+    'lastName'  => $last,
+    'login'     => $login,
+    'error'     => ''
+]);
+exit;
 
-function sendResultInfoAsJson( $obj )
-{
-  header('Content-type: application/json');
-  echo $obj;
+// ---- helpers ----
+function returnError($msg) {
+    echo json_encode([
+        'id'        => 0,
+        'firstName' => '',
+        'lastName'  => '',
+        'login'     => '',
+        'error'     => $msg
+    ]);
 }
-
-function returnWithError( $err )
-{
-  $retValue = '{"firstName":"","lastName":"","phone":"","email":"","error":"' . $err . '"}';
-  sendResultInfoAsJson( $retValue );
-}
-
-function returnWithInfo( $firstName, $lastName, $email, $phone )
-{
-  $retValue = '{"first_name":"' . $first_name . '","last_name":"' . $last_name . '","phone":"'. $phone . '","email":"' . $email . '","error":""}';
-  sendResultInfoAsJson( $retValue );
-}
-
 ?>
