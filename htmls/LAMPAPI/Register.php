@@ -7,10 +7,8 @@ $uname = "root";
 $pword = "COP4331group5lamp";
 $databasename = "COP4331";
 
-// creating connections
 $conn = new mysqli($servername, $uname, $pword, $databasename);
 
-//  check connections
 if(!$conn)
 {
   die("Connection failed: ". $conn->connect_error);
@@ -21,13 +19,11 @@ else
   echo "Connect succesfully";
 }
 
-//$sql = "INSERT INTO user_list (first_name, last_name, phone, email, other_info, email_verification) VALUES('Ben', 'clyde', '1234567890', 'awesomesauce@gmail.com', 'null', '0')";
 
 $sql = "INSERT INTO user_list (first_name, last_name, phone, email, other_info, email_verification) VALUES('$inData["first_name"]', '$inData["last_name"]', '$inData["phone"] ', '$inData["email"]', 'null', '0')";
 
 if($conn->query($sql) === TRUE)
 {
-  //echo "New record created successfully";
 
   $row = $result->fetch->fetch_assoc();
   $first_name = $row["first_name"];
