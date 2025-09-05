@@ -21,7 +21,6 @@
         if ( $stmt->execute() )
         {
             $newId = $conn->insert_id;
-            // Match Login.php envelope/order: firstName, lastName, id
             returnWithInfo( $firstName, $lastName, $newId );
         }
         else
@@ -55,5 +54,6 @@
         $retValue = '{"id":' . $id . ',"firstName":"' . $firstName . '","lastName":"' . $lastName . '","error":""}';
         sendResultInfoAsJson( $retValue );
     }
+
 
 ?>
