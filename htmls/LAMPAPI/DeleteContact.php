@@ -52,7 +52,6 @@
         sendResultInfoAsJson( $retValue );
     }
 
-    // Reuse the same success envelope format as Login.php
     function returnWithInfo( $firstName, $lastName, $id )
     {
         $retValue = '{"id":' . intval($id) . ',"firstName":"' . $firstName . '","lastName":"' . $lastName . '","error":""}';
@@ -60,3 +59,4 @@
     }
 
 ?>
+
