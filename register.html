@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contact Manager - Register</title>
+  <script type="text/javascript" src="js/md5.js"></script>
+  <script type="text/javascript" src="js/code.js"></script>
+  <link href="css/styles.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+  <style>
+    body {
+        background-image: linear-gradient(to right, #a9d1ca, #bfe0ca);
+        margin: 0;
+        min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="title">Contact Manager</h1>
+
+  <!-- Reuse #loginDiv container to get the same gray panel look from styles.css -->
+  <div id="loginDiv">
+    <span id="inner-title">CREATE ACCOUNT</span>
+    <input type="text" id="firstName" placeholder="First Name" /><br />
+    <input type="text" id="lastName" placeholder="Last Name" /><br />
+    <input type="text" id="loginName" placeholder="Username" /><br />
+    <input type="password" id="loginPassword" placeholder="Password" /><br />
+    <!-- Register button -->
+    <button type="button" id="registerButton" class="buttons" onclick="doRegister();">
+        Register
+    </button>
+
+    <!-- Message area (errors/success). Reuse the same id the sample styles (#loginResult) -->
+    <span id="loginResult"></span>
+
+    <!-- Back to login page (navigation) -->
+    <br /><br />
+    <button type="button" class="buttons" onclick="location.href='index.html';">
+        Back to Login
+    </button>
+  </div>
+
+</body>
+</html>
