@@ -5,7 +5,8 @@ let userId = 0;
 let firstName = "";
 let lastName = "";
 
-let contacts = []; // Keep the last search results so Edit buttons can reference current values
+let contacts = []; 
+let editingIndex = -1; 
 
 // ============================================================================
 // REUSED CODE FROM COLOR LAB
@@ -262,18 +263,39 @@ function renderContacts(list)
 		let c = list[i] || {};
 		let id = c.id;
 
-		let name  = escapeHtml((c.firstName || "") + " " + (c.lastName || ""));
-		let phone = escapeHtml(c.phone || "");
-		let email = escapeHtml(c.email || "");
-
 		html += "<tr>";
-		html += "<td style='padding: 6px 4px;'>" + name  + "</td>";
-		html += "<td style='padding: 6px 4px;'>" + phone + "</td>";
-		html += "<td style='padding: 6px 4px;'>" + email + "</td>";
-		html += "<td style='padding: 6px 4px;'>";
-		html += "<button class='buttons' style='width:auto;' onclick='editContact(" + i + ");'>Edit</button> ";
-		html += "<button class='buttons' style='width:auto;' onclick='deleteContact(" + id + ");'>Delete</button>";
-		html += "</td>";
+		
+		if (editingIndex === i) {
+			// Show editable form for this contact
+			html += "<td style='padding: 6px 4px;'>";
+			html += "<input type='text' id='editFirstName' value='" + escapeHtml(c.firstName || "") + "' placeholder='First Name' style='width:45%; margin-right:5px;' />";
+			html += "<input type='text' id='editLastName' value='" + escapeHtml(c.lastName || "") + "' placeholder='Last Name' style='width:45%;' />";
+			html += "</td>";
+			html += "<td style='padding: 6px 4px;'>";
+			html += "<input type='text' id='editPhone' value='" + escapeHtml(c.phone || "") + "' placeholder='Phone' style='width:100%;' />";
+			html += "</td>";
+			html += "<td style='padding: 6px 4px;'>";
+			html += "<input type='text' id='editEmail' value='" + escapeHtml(c.email || "") + "' placeholder='Email' style='width:100%;' />";
+			html += "</td>";
+			html += "<td style='padding: 6px 4px;'>";
+			html += "<button class='buttons' style='width:auto; margin-right:5px;' onclick='saveContact(" + i + ");'>Save</button>";
+			html += "<button class='buttons' style='width:auto;' onclick='cancelEdit();'>Cancel</button>";
+			html += "</td>";
+		} else {
+			// Show normal display for this contact
+			let name  = escapeHtml((c.firstName || "") + " " + (c.lastName || ""));
+			let phone = escapeHtml(c.phone || "");
+			let email = escapeHtml(c.email || "");
+
+			html += "<td style='padding: 6px 4px;'>" + name  + "</td>";
+			html += "<td style='padding: 6px 4px;'>" + phone + "</td>";
+			html += "<td style='padding: 6px 4px;'>" + email + "</td>";
+			html += "<td style='padding: 6px 4px;'>";
+			html += "<button class='buttons' style='width:auto; margin-right:5px;' onclick='editContact(" + i + ");'>Edit</button>";
+			html += "<button class='buttons' style='width:auto;' onclick='deleteContact(" + id + ");'>Delete</button>";
+			html += "</td>";
+		}
+		
 		html += "</tr>";
 	}
 
@@ -343,23 +365,36 @@ function addContact()
 
 function editContact(index)
 {
+    editingIndex = index;
+    renderContacts(contacts); // Re-render to show the edit form
+}
+
+function cancelEdit()
+{
+    editingIndex = -1;
+    renderContacts(contacts); // Re-render to hide the edit form
+}
+
+function saveContact(index)
+{
     let c = contacts[index];
     if (!c || !c.id) return;
 
-    // Prompt for updated values (simple, demo-friendly)
-    let newFirst = prompt("Edit First Name:", c.firstName || "");
-    let newLast  = prompt("Edit Last Name:",  c.lastName  || "");
-    let newPhone = prompt("Edit Phone:",      c.phone     || "");
-    let newEmail = prompt("Edit Email:",      c.email     || "");
+    // Get values from the edit form
+    let newFirst = document.getElementById("editFirstName").value.trim();
+    let newLast  = document.getElementById("editLastName").value.trim();
+    let newPhone = document.getElementById("editPhone").value.trim();
+    let newEmail = document.getElementById("editEmail").value.trim();
 
     let updated = {
         id: c.id,
-        firstName: (newFirst || "").trim(),
-        lastName:  (newLast  || "").trim(),
-        phone:     (newPhone || "").trim(),
-        email:     (newEmail || "").trim()
+        firstName: newFirst,
+        lastName: newLast,
+        phone: newPhone,
+        email: newEmail
     };
 
+    editingIndex = -1; // Exit edit mode
     updateContact(updated);
 }
 
@@ -392,11 +427,14 @@ function updateContact(updated)
 
                 if (jsonObject.error)
                 {
-                    alert("Update failed: " + jsonObject.error);
+                    let msg = document.getElementById("contactSearchResult");
+                    if (msg) msg.innerHTML = "Update failed: " + jsonObject.error;
                     return;
                 }
 
-                // Refresh the list after a successful update
+                // Show success message and refresh the list
+                let msg = document.getElementById("contactSearchResult");
+                if (msg) msg.innerHTML = "Contact updated successfully";
                 searchContacts();
             }
         };
@@ -404,7 +442,8 @@ function updateContact(updated)
     }
     catch(err)
     {
-        alert(err.message);
+        let msg = document.getElementById("contactSearchResult");
+        if (msg) msg.innerHTML = "Update error: " + err.message;
     }
 }
 
