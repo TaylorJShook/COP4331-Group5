@@ -1,45 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>Contact Manager - Register</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script type="text/javascript" src="js/md5.js"></script>
   <script type="text/javascript" src="js/code.js"></script>
   <link href="css/styles.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
-  <style>
-    body {
-        background-image: linear-gradient(to right, #a9d1ca, #bfe0ca);
-        margin: 0;
-        min-height: 100vh;
-    }
-  </style>
 </head>
-
-<body>
+<body class="bg-register">
 
   <h1 id="title">Contact Manager</h1>
 
-  <!-- Reuse #loginDiv container to get the same gray panel look from styles.css -->
-  <div id="loginDiv">
-    <span id="inner-title">CREATE ACCOUNT</span>
-    <input type="text" id="firstName" placeholder="First Name" /><br />
-    <input type="text" id="lastName" placeholder="Last Name" /><br />
-    <input type="text" id="loginName" placeholder="Username" /><br />
-    <input type="password" id="loginPassword" placeholder="Password" /><br />
-    <!-- Register button -->
-    <button type="button" id="registerButton" class="buttons" onclick="doRegister();">
-        Register
-    </button>
+  <main id="main" role="main">
+    <!-- Reuse #loginDiv container to get the same gray panel look from styles.css -->
+    <div id="loginDiv">
+      <span id="inner-title">CREATE ACCOUNT</span>
 
-    <!-- Message area (errors/success). Reuse the same id the sample styles (#loginResult) -->
-    <span id="loginResult"></span>
+      <!-- Wrap fields in a form so Enter submits; keep layout via sr-only labels -->
+      <form onsubmit="doRegister(); return false;" aria-labelledby="inner-title">
+        <label class="sr-only" for="firstName">First Name</label>
+        <input type="text" id="firstName" placeholder="First Name" autocomplete="given-name" required /><br />
 
-    <!-- Back to login page (navigation) -->
-    <br /><br />
-    <button type="button" class="buttons" onclick="location.href='index.html';">
-        Back to Login
-    </button>
-  </div>
+        <label class="sr-only" for="lastName">Last Name</label>
+        <input type="text" id="lastName" placeholder="Last Name" autocomplete="family-name" required /><br />
+
+        <label class="sr-only" for="loginName">Username</label>
+        <input type="text" id="loginName" placeholder="Username" autocomplete="username" required /><br />
+
+        <label class="sr-only" for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Password" autocomplete="new-password" required /><br />
+
+        <!-- Register button -->
+        <button type="submit" id="registerButton" class="buttons">Register</button>
+      </form>
+
+      <!-- Message area (errors/success) announced by screen readers -->
+      <span id="loginResult" role="status" aria-live="polite"></span>
+
+      <!-- Back to login page (navigation) -->
+      <br /><br />
+      <button type="button" class="buttons" onclick="location.href='index.html';">
+          Back to Login
+      </button>
+    </div>
+  </main>
 
 </body>
 </html>
