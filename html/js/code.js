@@ -5,8 +5,9 @@ let userId = 0;
 let firstName = "";
 let lastName = "";
 
-let contacts = []; 
-let editingIndex = -1; 
+let contacts = []; // Keep the last search results so Edit buttons can reference current values
+let editingIndex = -1; // which row is currently in "edit" mode (-1 = none)
+
 
 // ============================================================================
 // REUSED CODE FROM COLOR LAB
@@ -237,73 +238,74 @@ function searchContacts()
 
 function renderContacts(list)
 {
-	let bucket = document.getElementById("results");
-	if (!bucket) return;
+  let bucket = document.getElementById("results");
+  if (!bucket) return;
 
-	if (!list || !list.length)
-	{
-		bucket.innerHTML = "";
-		return;
-	}
+  if (!list || !list.length)
+  {
+    bucket.innerHTML = "";
+    return;
+  }
 
-	let html = "";
-	html += "<table style='width:100%; border-collapse: collapse;'>";
-	html += "<thead>";
-	html += "<tr>";
-	html += "<th style='text-align:left; padding: 6px 4px;'>Name</th>";
-	html += "<th style='text-align:left; padding: 6px 4px;'>Phone</th>";
-	html += "<th style='text-align:left; padding: 6px 4px;'>Email</th>";
-	html += "<th style='text-align:left; padding: 6px 4px;'>Actions</th>";
-	html += "</tr>";
-	html += "</thead>";
-	html += "<tbody>";
+  // Build an accessible, stylable table
+  let html = "";
+  html += "<table class='contacts-table'>";
+  // Optional column sizing hooks (CSS can target these)
+  html += "<colgroup><col><col><col><col></colgroup>";
+  html += "<caption>Search results</caption>";
+  html += "<thead>";
+  html +=   "<tr>";
+  html +=     "<th scope='col'>Name</th>";
+  html +=     "<th scope='col'>Phone</th>";
+  html +=     "<th scope='col'>Email</th>";
+  html +=     "<th scope='col'>Actions</th>";
+  html +=   "</tr>";
+  html += "</thead>";
+  html += "<tbody>";
 
-	for (let i = 0; i < list.length; i++)
-	{
-		let c = list[i] || {};
-		let id = c.id;
+  for (let i = 0; i < list.length; i++)
+  {
+    let c = list[i] || {};
+    let id = c.id;
 
-		html += "<tr>";
-		
-		if (editingIndex === i) {
-			// Show editable form for this contact
-			html += "<td style='padding: 6px 4px;'>";
-			html += "<input type='text' id='editFirstName' value='" + escapeHtml(c.firstName || "") + "' placeholder='First Name' style='width:45%; margin-right:5px;' />";
-			html += "<input type='text' id='editLastName' value='" + escapeHtml(c.lastName || "") + "' placeholder='Last Name' style='width:45%;' />";
-			html += "</td>";
-			html += "<td style='padding: 6px 4px;'>";
-			html += "<input type='text' id='editPhone' value='" + escapeHtml(c.phone || "") + "' placeholder='Phone' style='width:100%;' />";
-			html += "</td>";
-			html += "<td style='padding: 6px 4px;'>";
-			html += "<input type='text' id='editEmail' value='" + escapeHtml(c.email || "") + "' placeholder='Email' style='width:100%;' />";
-			html += "</td>";
-			html += "<td style='padding: 6px 4px;'>";
-			html += "<button class='buttons' style='width:auto; margin-right:5px;' onclick='saveContact(" + i + ");'>Save</button>";
-			html += "<button class='buttons' style='width:auto;' onclick='cancelEdit();'>Cancel</button>";
-			html += "</td>";
-		} else {
-			// Show normal display for this contact
-			let name  = escapeHtml((c.firstName || "") + " " + (c.lastName || ""));
-			let phone = escapeHtml(c.phone || "");
-			let email = escapeHtml(c.email || "");
+    // Safe text for HTML + screen readers
+    let nameText  = (c.firstName || "") + " " + (c.lastName || "");
+    let name  = escapeHtml(nameText.trim());
+    let phone = escapeHtml(c.phone || "");
+    let email = escapeHtml(c.email || "");
 
-			html += "<td style='padding: 6px 4px;'>" + name  + "</td>";
-			html += "<td style='padding: 6px 4px;'>" + phone + "</td>";
-			html += "<td style='padding: 6px 4px;'>" + email + "</td>";
-			html += "<td style='padding: 6px 4px;'>";
-			html += "<button class='buttons' style='width:auto; margin-right:5px;' onclick='editContact(" + i + ");'>Edit</button>";
-			html += "<button class='buttons' style='width:auto;' onclick='deleteContact(" + id + ");'>Delete</button>";
-			html += "</td>";
-		}
-		
-		html += "</tr>";
-	}
+    html += "<tr>";
+    if (i === editingIndex) {
+      // EDIT MODE: inputs + Save/Cancel
+      html +=   "<td>"
+             +    "<input id='editFirstName' type='text' value='" + escapeHtml(c.firstName || "") + "' style='width:90%;' placeholder='First Name' /> "
+             +    "<input id='editLastName'  type='text' value='" + escapeHtml(c.lastName  || "") + "' style='width:90%; margin-top:6px;' placeholder='Last Name' />"
+             +  "</td>";
+      html +=   "<td><input id='editPhone' type='tel' value='" + phone + "' style='width:95%;' placeholder='Phone' /></td>";
+      html +=   "<td><input id='editEmail' type='email' value='" + email + "' style='width:95%;' placeholder='Email' /></td>";
+      html +=   "<td class='col-actions'>"
+             +    "<button class='buttons' style='width:auto;' aria-label='Save " + name + "' onclick='saveContact(" + i + ");'>Save</button> "
+             +    "<button class='buttons' style='width:auto;' aria-label='Cancel editing " + name + "' onclick='cancelEdit();'>Cancel</button>"
+             +  "</td>";
+    } else {
+      // VIEW MODE
+      html +=   "<td>" + name  + "</td>";
+      html +=   "<td>" + phone + "</td>";
+      html +=   "<td>" + email + "</td>";
+      html +=   "<td class='col-actions'>"
+             +    "<button class='buttons' style='width:auto;' aria-label='Edit " + name + "' onclick='editContact(" + i + ");'>Edit</button> "
+             +    "<button class='buttons' style='width:auto;' aria-label='Delete " + name + "' onclick='deleteContact(" + id + ");'>Delete</button>"
+             +  "</td>";
+    }
+    html += "</tr>";
+  }
 
-	html += "</tbody>";
-	html += "</table>";
+  html += "</tbody>";
+  html += "</table>";
 
-	bucket.innerHTML = html;
+  bucket.innerHTML = html;
 }
+
 
 function addContact()
 {
@@ -365,37 +367,37 @@ function addContact()
 
 function editContact(index)
 {
-    editingIndex = index;
-    renderContacts(contacts); // Re-render to show the edit form
+  if (index < 0 || index >= contacts.length) return;
+  editingIndex = index;
+  renderContacts(contacts);
 }
 
 function cancelEdit()
 {
-    editingIndex = -1;
-    renderContacts(contacts); // Re-render to hide the edit form
+  editingIndex = -1;
+  renderContacts(contacts);
 }
 
 function saveContact(index)
 {
-    let c = contacts[index];
-    if (!c || !c.id) return;
+  if (index < 0 || index >= contacts.length) return;
+  let c = contacts[index];
+  if (!c || !c.id) return;
 
-    // Get values from the edit form
-    let newFirst = document.getElementById("editFirstName").value.trim();
-    let newLast  = document.getElementById("editLastName").value.trim();
-    let newPhone = document.getElementById("editPhone").value.trim();
-    let newEmail = document.getElementById("editEmail").value.trim();
+  let newFirst = (document.getElementById("editFirstName")?.value || "").trim();
+  let newLast  = (document.getElementById("editLastName") ?.value || "").trim();
+  let newPhone = (document.getElementById("editPhone")    ?.value || "").trim();
+  let newEmail = (document.getElementById("editEmail")    ?.value || "").trim();
 
-    let updated = {
-        id: c.id,
-        firstName: newFirst,
-        lastName: newLast,
-        phone: newPhone,
-        email: newEmail
-    };
+  let updated = {
+    id: c.id,
+    firstName: newFirst,
+    lastName:  newLast,
+    phone:     newPhone,
+    email:     newEmail
+  };
 
-    editingIndex = -1; // Exit edit mode
-    updateContact(updated);
+  updateContact(updated);
 }
 
 function updateContact(updated)
@@ -427,23 +429,19 @@ function updateContact(updated)
 
                 if (jsonObject.error)
                 {
-                    let msg = document.getElementById("contactSearchResult");
-                    if (msg) msg.innerHTML = "Update failed: " + jsonObject.error;
+                    alert("Update failed: " + jsonObject.error);
                     return;
                 }
 
-                // Show success message and refresh the list
-                let msg = document.getElementById("contactSearchResult");
-                if (msg) msg.innerHTML = "Contact updated successfully";
-                searchContacts();
+                editingIndex = -1;      // leave edit mode only on success
+                searchContacts();       // Refresh the list after a successful update
             }
         };
         xhr.send(jsonPayload);
     }
     catch(err)
     {
-        let msg = document.getElementById("contactSearchResult");
-        if (msg) msg.innerHTML = "Update error: " + err.message;
+        alert(err.message);
     }
 }
 
