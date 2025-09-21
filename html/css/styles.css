@@ -70,6 +70,18 @@ input[type="tel"] {
   cursor: pointer;
 }
 
+/* Center primary buttons inside forms (Login, Search, Register, Add Contact) */
+form .buttons {
+  display: block;         /* overrides .buttons inline-block */
+  margin: 12px auto;      /* horizontal centering */
+}
+
+/* Center the secondary nav button(s) in the auth panels (Register / Back to Login) */
+#loginDiv > .buttons {
+  display: block;
+  margin: 12px auto;
+}
+
 .buttons:hover{
   background-color: #73ff9f;
   color: #000000; /* <- semicolon fixed */
